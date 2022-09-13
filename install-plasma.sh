@@ -5,12 +5,13 @@ set -e
 ## used on a standard install of ubuntu-22.04.1-live-server-amd64.iso
 # This script is largely idempotent, which means it can be run more than once, in case of an error for example.
 
-## Usage (logs in /var/log/, increase 'run=02' to prevent caching after making changes):
-# Use 'script' command for logging (logging via '| tee ' did not work as it hangs & prevents responses to user input)
-# script -q -a install-kde-plasma.log
-# bash <(curl -Ls https://raw.githubusercontent.com/chriswayg/linux-installer-scripts/main/install-plasma.sh?run=01)
-# Ctrl-D to close the script log
-# sudo reboot
+## Usage (additional logs in /var/log/, increase 'run=02' to prevent caching after making changes):
+#  use 'script' command for logging (logging via '| tee ' did not work as it hangs & prevents responses to user input)
+#
+#    script -q -a install-kde-plasma.log
+#    bash <(curl -Ls https://raw.githubusercontent.com/chriswayg/linux-installer-scripts/main/install-plasma.sh?run=01)
+#    exit   # or Ctrl-D or to close the script log
+#    sudo reboot
 
 # Work-around for a bug where whiptail/dialog is becoming unresponsive & the cursor is missing in terminal
 # using sudo -E (--preserve-env) to make sure that 'needrestart' will not prompt repeatedly
@@ -183,4 +184,4 @@ sudo -E deb-get clean
 [ ! -f /var/log/installed-packages-desktop.log ] && sudo dpkg --get-selections | sudo tee /var/log/installed-packages-desktop.log > /dev/null
 
 echo ""
-echo "***** Reboot now! *****"
+echo "***** Exit the log & Reboot now! *****"
