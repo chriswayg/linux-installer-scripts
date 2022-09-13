@@ -5,8 +5,12 @@ set -e
 ## used on a standard install of ubuntu-22.04.1-live-server-amd64.iso
 # This script is largely idempotent, which means it can be run more than once, in case of an error for example.
 
-## Usage (logs in /var/log/, increase 'run=02' to prevent caching after making changes to this script): 
-# bash <(curl -Ls https://raw.githubusercontent.com/chriswayg/linux-installer-scripts/main/install-plasma.sh?run=01) | sudo tee /var/log/install-kde-plasma.log
+## Usage (logs in /var/log/, increase 'run=02' to prevent caching after making changes):
+# Use 'script' command for logging (logging via '| tee ' did not work as it hangs & prevents responses to user input)
+# script -q -a install-kde-plasma.log
+# bash <(curl -Ls https://raw.githubusercontent.com/chriswayg/linux-installer-scripts/main/install-plasma.sh?run=01)
+# Ctrl-D to close the script log
+# sudo reboot
 
 # Work-around for a bug where whiptail/dialog is becoming unresponsive & the cursor is missing in terminal
 # using sudo -E (--preserve-env) to make sure that 'needrestart' will not prompt repeatedly
@@ -93,10 +97,11 @@ echo "***** Replacing Kubuntu Boot Splash with Breeze as default  *****"
 #sudo -E apt-get purge -yq plymouth-theme-kubuntu-logo plymouth-theme-spinner plymouth-theme-ubuntu-text plymouth-theme-kubuntu-text
 sudo -E apt-get install -yq kde-config-plymouth plymouth-theme-breeze
 
-sudo mkdir -p /etc/plymouth/
-echo '[Daemon] 
-Theme=breeze
-' | sudo tee /etc/plymouth/plymouthd.conf > /dev/null
+# this does not really activate breeze
+#sudo mkdir -p /etc/plymouth/
+#echo '[Daemon] 
+#Theme=breeze
+#' | sudo tee /etc/plymouth/plymouthd.conf > /dev/null
 
 # this does not show breeze.plymouth as an available option
 #sudo -E update-alternatives --config default.plymouth
@@ -162,7 +167,7 @@ mkdir -p ~/Applications
 echo "***** Installing deb-get for 3rd party deb packages *****"
 curl -sL https://raw.githubusercontent.com/wimpysworld/deb-get/main/deb-get | sudo -E bash -s install deb-get
 
-echo "***** Updating the current installation, cleanup & reboot *****"
+echo "***** Updating the current installation, cleanup *****"
 sudo -E apt-get update
 sudo -E apt-get upgrade -yq
 
@@ -177,4 +182,5 @@ sudo -E deb-get clean
 
 [ ! -f /var/log/installed-packages-desktop.log ] && sudo dpkg --get-selections | sudo tee /var/log/installed-packages-desktop.log > /dev/null
 
-sudo shutdown -r now
+echo ""
+echo "***** Reboot now! *****"
