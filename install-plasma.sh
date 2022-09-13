@@ -5,6 +5,8 @@ set -e
 ## used on a standard install of ubuntu-22.04.1-live-server-amd64.iso
 # This script is largely idempotent, which means it can be run more than once, in case of an error for example.
 
+## Usage (logs in /var/log/, increase 'run=02' to prevent caching after making changes to this script): 
+# bash <(curl -Ls https://raw.githubusercontent.com/chriswayg/linux-installer-scripts/main/install-plasma.sh?run=01) | sudo tee /var/log/install-kde-plasma.log
 
 # Work-around for a bug where whiptail/dialog is becoming unresponsive & the cursor is missing in terminal
 # using sudo -E (--preserve-env) to make sure that 'needrestart' will not prompt repeatedly
