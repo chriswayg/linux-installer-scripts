@@ -59,7 +59,8 @@ echo -e "\n***** Installing additional Kubuntu Desktop (via tasksel) & KDE Plasm
 sudo -E apt-get install -yq tasksel
 sudo -E apt-fast install -yq kubuntu-desktop^
 sudo -E apt-fast install -yq kde-plasma-desktop
-# optionally install an additional 550+ packages for the full KDE desktop
+# optionally install an additional 145+ packages for KDE standard or 550+ packages for the full KDE desktop
+#sudo -E apt-fast install -yq kde-standard
 #sudo -E apt-fast install -yq kde-full
 
 echo -e "\n***** Installing Kubuntu restricted extras & addons incl MS fonts *****"
