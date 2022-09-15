@@ -7,6 +7,7 @@ set -e
 
 ## Usage (additional logs in /var/log/, increase 'run=02' to prevent caching after making changes):
 #  use 'script' command for logging (logging via '| tee ' did not work as it hangs & prevents responses to user input)
+#  run this as a normal user (the script will ask for sudo elevation)
 #
 #    script -q -a install-kde-plasma.log
 #    bash <(curl -Ls https://raw.githubusercontent.com/chriswayg/linux-installer-scripts/main/install-plasma.sh?run=01)
