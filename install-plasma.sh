@@ -21,22 +21,23 @@ export DEBIAN_FRONTEND=readline
 export NEEDRESTART_SUSPEND=true
 sudo -E apt-get update
 
-# Change this to the relevant timezone
+# only run this once to record the installed server iso packages before changes are made
+[ ! -f /var/log/installed-packages-server.log ] && sudo dpkg --get-selections | sudo tee /var/log/installed-packages-server.log > /dev/null
+
+# change this to the relevant timezone
 sudo timedatectl set-timezone Asia/Manila
 
-echo "***** Preventing Firefox Snap version from being installed *****"
+echo -e "\n***** Preventing Firefox Snap version from being installed *****"
 [ ! -f /etc/apt/preferences.d/firefox-snap-prevent ] && echo 'Package: firefox*
 Pin: release o=Ubuntu 
 Pin-Priority: -1
 ' | sudo tee /etc/apt/preferences.d/firefox-snap-prevent > /dev/null
 
-[ ! -f /var/log/installed-packages-server.log ] && sudo dpkg --get-selections | sudo tee /var/log/installed-packages-server.log > /dev/null
-
-echo "***** Installing Backports Repositories with latest versions of KDE Plasma *****"
+echo -e "\n***** Installing Backports Repositories with latest versions of KDE Plasma *****"
 [ ! -f /etc/apt/sources.list.d/kubuntu-ppa-ubuntu-backports-jammy.list ] && sudo add-apt-repository ppa:kubuntu-ppa/backports -y
 [ ! -f /etc/apt/sources.list.d/kubuntu-ppa-ubuntu-backports-extra-jammy.list ] && sudo add-apt-repository ppa:kubuntu-ppa/backports-extra -y
 
-echo "***** Installing & configuring apt-fast to speed up Plasma download *****"
+echo -e "\n***** Installing & configuring apt-fast to speed up Plasma download *****"
 [ ! -f /etc/apt/sources.list.d/apt-fast-ubuntu-stable-jammy.list ] && sudo add-apt-repository ppa:apt-fast/stable -y
 cat > ~/debconf-aptfast << "EOF"
 apt-fast	apt-fast/aptmanager	select	apt-get
@@ -51,26 +52,26 @@ sudo -E apt-get install -yq apt-fast
 
 # Using this sequence of installation, Firefox Snap is expected to NOT be installed
 
-echo "***** Installing Kubuntu Desktop *****"
+echo -e "\n***** Installing Kubuntu Desktop *****"
 sudo -E apt-fast install -yq kubuntu-desktop
 
-echo "***** Installing some additional Kubuntu Desktop packages (via tasksel) *****"
+echo -e "\n***** Installing some additional Kubuntu Desktop packages (via tasksel) *****"
 sudo -E apt-get install -yq tasksel
 sudo -E apt-fast install -yq kubuntu-desktop^
 
-echo "***** Installing Kubuntu restricted extras & addons incl MS fonts *****"
+echo -e "\n***** Installing Kubuntu restricted extras & addons incl MS fonts *****"
 sudo -E apt-fast install -yq kubuntu-restricted-extras kubuntu-restricted-addons
 
-echo "***** Adding Wayland as an option *****"
+echo -e "\n***** Adding Wayland as an option *****"
 # note: copy-paste from & to macOS <-> Parallels VM does not work in Wayland
 sudo -E apt-get install -yq kwin-wayland plasma-workspace-wayland
 sudo -E apt-get install -yq $(check-language-support -l en)
 
-echo "***** Removing Maui SSDM theme to ensure that Breeze will be the default *****"
+echo -e "\n***** Removing Maui SSDM theme to ensure that Breeze will be the default *****"
 # usually this has not been installed anyways
 sudo -E apt-get purge -yq sddm-theme-debian-maui
 
-echo "***** Removing cloud-init *****"
+echo -e "\n***** Removing cloud-init *****"
 # cloud-init is not useful on the desktop
 sudo -E apt-get purge -yq cloud-init
 sudo rm -rfv /etc/cloud && sudo rm -rfv /var/lib/cloud/
@@ -78,7 +79,8 @@ sudo rm -rfv /etc/cloud && sudo rm -rfv /var/lib/cloud/
 # ensuring that netplan.io will not be autoremoved
 sudo -E apt-mark manual netplan.io
 
-echo "***** Configuring the Network via Netplan & NetworkManager *****"
+echo -e "\n***** Configuring the Network via Netplan & NetworkManager *****"
+# this will overwrite any previous config
 echo '# Let NetworkManager manage all devices on this system
 network:
   version: 2
@@ -88,12 +90,12 @@ network:
 sudo netplan generate
 sudo netplan apply
 
-echo "***** Enabling Graphical Boot *****"
+echo -e "\n***** Enabling Graphical Boot *****"
 # replacing the complete line only if no other options have been set
 sudo sed -i.bak '/^GRUB_CMDLINE_LINUX_DEFAULT=""/c\GRUB_CMDLINE_LINUX_DEFAULT="quiet splash"' /etc/default/grub
 sudo -E update-grub
 
-echo "***** Replacing Kubuntu Boot Splash with Breeze as default  *****"
+echo -e "\n***** Replacing Kubuntu Boot Splash with Breeze as default  *****"
 # TODO: this still requires manually setting Breeze as boot splash in Settings -> Appearance -> Boot Splash Screen
 # change back-and-forth with 'Apply' (possibly restart) between Breeze (Text Mode) and Breeze for the setting to be applied
 #sudo -E apt-get purge -yq plymouth-theme-kubuntu-logo plymouth-theme-spinner plymouth-theme-ubuntu-text plymouth-theme-kubuntu-text
@@ -109,7 +111,7 @@ sudo -E apt-get install -yq kde-config-plymouth plymouth-theme-breeze
 #sudo -E update-alternatives --config default.plymouth
 #sudo -E update-initramfs -u
 
-echo "***** Configuring KDE Plasma Settings (Splash, Numlock, Automatic Updates) *****"
+echo -e "\n***** Configuring KDE Plasma Settings (Splash, Numlock, Automatic Updates) *****"
 kwriteconfig5 --file ksplashrc --group KSplash --key Theme "org.kde.breeze.desktop"
 kwriteconfig5 --file kcminputrc --group Keyboard --key NumLock 0
 kwriteconfig5 --file PlasmaDiscoverUpdates --group Global --key UseUnattendedUpdates --type bool true
@@ -119,12 +121,13 @@ kwriteconfig5 --file dolphinrc --group DetailsMode --key PreviewSize 22
 kwriteconfig5 --file plasmanotifyrc --group Applications --group @other --key ShowInHistory --type bool true
 kwriteconfig5 --file plasmanotifyrc --group Applications --group @other --key ShowPopups --type bool false
 
-echo "***** Installing Firefox from PPA & setting it as Default *****"
+echo -e "\n***** Installing Firefox from PPA & setting it as Default *****"
+## reasons for not using Firefox Snap: slow start, incompatible with KeePassXC
 # remove snap version, just in case
 sudo snap remove firefox
 [ ! -f /etc/apt/sources.list.d/mozillateam-ubuntu-ppa-jammy.list ] && sudo add-apt-repository ppa:mozillateam/ppa -y
 
-# remove tarball installed Firefox (just checking the default locations)
+# remove tarball installed Firefox (only checking the default locations)
 # https://support.mozilla.org/en-US/kb/install-firefox-linux#w_install-firefox-from-mozilla-builds-for-advanced-users
 [ -f /usr/local/bin/firefox ] && sudo rm -v /usr/local/bin/firefox /usr/local/share/applications/firefox.desktop
 [ -d /opt/firefox ] && sudo rm -rf /opt/firefox
@@ -144,7 +147,7 @@ kwriteconfig5 --file mimeapps.list --group "Added Associations" --key "x-scheme-
 kwriteconfig5 --file mimeapps.list --group "Default Applications" --key "x-scheme-handler/http" "firefox.desktop;"
 kwriteconfig5 --file mimeapps.list --group "Default Applications" --key "x-scheme-handler/https" "firefox.desktop;"
 
-echo "***** Adding a desktop launcher to run Dolphin as Root *****"
+echo -e "\n***** Adding a desktop launcher to run Dolphin as Root *****"
 mkdir -p ~/.local/share/applications/
 cat > ~/.local/share/applications/dolphin-root.desktop << "EOF"
 [Desktop Entry]
@@ -159,10 +162,10 @@ MimeType=inode/directory;
 Keywords=files;file management;file browsing;samba;network shares;Explorer;Finder;
 EOF
 
-echo "***** Installing prerequisites for Parallels Tools *****"
+echo -e "\n***** Installing prerequisites for Parallels Tools *****"
 sudo -E apt-get install -yq gcc make dkms libelf-dev
 
-echo "***** Installing Flatpak and Appimage support *****"
+echo -e "\n***** Installing Flatpak and Appimage support *****"
 sudo -E apt-get install -yq flatpak plasma-discover-backend-flatpak
 sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
 
@@ -171,15 +174,14 @@ mkdir -p ~/Applications
 [[ ! -n $(shopt -s nullglob; echo ~/Applications/appimaged-*.AppImage) ]] && wget -c https://github.com/$(wget -q https://github.com/probonopd/go-appimage/releases -O - | grep "appimaged-.*-x86_64.AppImage" | head -n 1 | cut -d '"' -f 2) -P ~/Applications/ && chmod +x ~/Applications/appimaged-*.AppImage && ~/Applications/appimaged-*.AppImage
 # TODO: the last command results in a timeout with: "ERROR: notification: Process org.freedesktop.Notifications exited with status 1", but still works
 
-echo "***** Installing deb-get for 3rd party deb packages *****"
-curl -sL https://raw.githubusercontent.com/wimpysworld/deb-get/main/deb-get | sudo -E bash -s install deb-get
+echo -e "\n***** Installing deb-get for 3rd party deb packages *****"
+# TODO: - add installing additional essential packages here (for example KeePassXC)
+#       - add installing developer related packages (including manually added to deb-get)
+[ ! -f /usr/bin/deb-get ] && curl -sL https://raw.githubusercontent.com/wimpysworld/deb-get/main/deb-get | sudo -E bash -s install deb-get
 
-echo "***** Updating the current installation, cleanup *****"
+echo -e "\n***** Updating the current installation, cleanup *****"
 sudo -E apt-get update
 sudo -E apt-get upgrade -yq
-
-# Restore debconf defaults
-sudo DEBIAN_FRONTEND=noninteractive dpkg-reconfigure debconf --frontend=dialog --priority=high
 
 # Cleanup 
 sudo -E apt-get -yq autoremove
@@ -187,7 +189,10 @@ sudo -E apt-get -yq clean
 sudo -E apt-fast -yq clean
 sudo -E deb-get clean
 
+# Restore debconf defaults
+sudo DEBIAN_FRONTEND=noninteractive dpkg-reconfigure debconf --frontend=dialog --priority=high
+
+# only run this once to get the installed packages after the KDE Plasma desktop has been installed
 [ ! -f /var/log/installed-packages-desktop.log ] && sudo dpkg --get-selections | sudo tee /var/log/installed-packages-desktop.log > /dev/null
 
-echo ""
-echo "***** Exit the log & Reboot now! *****"
+echo -e "\n***** Exit the log & Reboot now! *****"
