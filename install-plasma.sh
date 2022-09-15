@@ -11,6 +11,11 @@ set -e
 #
 #    script -q -a install-kde-plasma.log
 #    bash <(curl -Ls https://raw.githubusercontent.com/chriswayg/linux-installer-scripts/main/install-plasma.sh?run=01)
+#
+#    # enter sudo password & wait a few minutes
+#    # only the MS Fonts installer will require confirmation
+#    # note: the appimaged installer will timeout after a minute waiting for the notification service
+#
 #    exit   # or Ctrl-D or to close the script log
 #    sudo reboot
 
