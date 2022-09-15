@@ -55,9 +55,12 @@ sudo -E apt-get install -yq apt-fast
 echo -e "\n***** Installing Kubuntu Desktop *****"
 sudo -E apt-fast install -yq kubuntu-desktop
 
-echo -e "\n***** Installing some additional Kubuntu Desktop packages (via tasksel) *****"
+echo -e "\n***** Installing additional Kubuntu Desktop (via tasksel) & KDE Plasma packages *****"
 sudo -E apt-get install -yq tasksel
 sudo -E apt-fast install -yq kubuntu-desktop^
+sudo -E apt-fast install -yq kde-plasma-desktop
+# optionally install an additional 550+ packages for the full KDE desktop
+#sudo -E apt-fast install -yq kde-full
 
 echo -e "\n***** Installing Kubuntu restricted extras & addons incl MS fonts *****"
 sudo -E apt-fast install -yq kubuntu-restricted-extras kubuntu-restricted-addons
