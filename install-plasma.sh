@@ -123,6 +123,11 @@ echo "***** Installing Firefox from PPA & setting it as Default *****"
 sudo snap remove firefox
 [ ! -f /etc/apt/sources.list.d/mozillateam-ubuntu-ppa-jammy.list ] && sudo add-apt-repository ppa:mozillateam/ppa -y
 
+# remove tarball installed Firefox (just checking the default locations)
+# https://support.mozilla.org/en-US/kb/install-firefox-linux#w_install-firefox-from-mozilla-builds-for-advanced-users
+[ -f /usr/local/bin/firefox ] && sudo rm -v /usr/local/bin/firefox /usr/local/share/applications/firefox.desktop
+[ -d /opt/firefox ] && sudo rm -rf /opt/firefox
+
 [ ! -f /etc/apt/preferences.d/firefox-mozillateam ] && echo 'Package: *
 Pin: release o=LP-PPA-mozillateam
 Pin-Priority: 1001
