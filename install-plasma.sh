@@ -138,6 +138,8 @@ kwriteconfig5 --file dolphinrc --group DetailsMode --key PreviewSize 22
 # minimize notification popups from other applications (for example appimaged)
 kwriteconfig5 --file plasmanotifyrc --group Applications --group @other --key ShowInHistory --type bool true
 kwriteconfig5 --file plasmanotifyrc --group Applications --group @other --key ShowPopups --type bool false
+# Creating a full suite of localized default user directories within the $HOME directory (only needed for Server.iso)
+xdg-user-dirs-update --force
 
 echo -e "\n***** Installing Firefox from PPA & setting it as Default *****"
 ## reasons for not using Firefox Snap: slow start, incompatible with KeePassXC
@@ -210,6 +212,10 @@ sudo -E apt-get install -yq dolphin-nextcloud
 echo -e "\n***** Updating the current installation, cleanup *****"
 sudo -E apt-get update
 sudo -E apt-fast upgrade -yq
+
+# add some packages
+sudo -E apt-get install -yq efibootmgr partitionmanager # (wwhen using Server.iso)
+sudo -E apt-get install -yq htop ktorrent # (when using Kubuntu.iso)
 
 # Cleanup 
 sudo -E apt-get -yq autoremove
