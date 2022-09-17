@@ -3,8 +3,13 @@ set -e
 
 ## Bash Script to Install KDE Plasma from Backports Extra on Ubuntu Server or Kubuntu Desktop 22.04 LTS 
 ## use on a standard install of ubuntu-22.04.1-live-server-amd64.iso (with SSH) or kubuntu-22.04.1-desktop-amd64.iso
-# the result is very similar, with some additional packages (ssh, htop, needrestart, ...) remaining on the server.iso based install
-# while the Kubuntu.iso based install is missing some KDE games, but has efibootmgr, partitionmanager, secure boot utilities and grub-efi added
+#
+# The result is very similar, but the install using Kubuntu.iso takes considerably longer.
+# The Server.iso based install has /boot separate and some additional server packages (ssh, htop, needrestart, ...) remaining.
+# While the Kubuntu.iso based install is missing some KDE games, but has efibootmgr, partitionmanager, secure boot utilities 
+# and grub-efi added and also has the default Documents, Pictures, etc. folders configured for desktop users. 
+# see: Diff SERVER - KUBUNTU based.txt
+# 
 # This script is largely idempotent, which means it can be run more than once, in case of an error for example.
 
 ## Usage (additional logs in /var/log/, increase 'run=02' to prevent caching after making changes):
@@ -32,14 +37,8 @@ sudo -E apt-get update
 # only run this once to record the installed default packages before changes are made
 [ ! -f /var/log/installed-packages-default.log ] && sudo dpkg --get-selections | sudo tee /var/log/installed-packages-default.log > /dev/null
 
-# change this to the relevant timezone
+# change this to the relevant timezone (only needed for Server.iso)
 sudo timedatectl set-timezone Asia/Manila
-
-echo -e "\n***** Preventing Firefox Snap version from being installed *****"
-[ ! -f /etc/apt/preferences.d/firefox-snap-prevent ] && echo 'Package: firefox*
-Pin: release o=Ubuntu 
-Pin-Priority: -1
-' | sudo tee /etc/apt/preferences.d/firefox-snap-prevent > /dev/null
 
 echo -e "\n***** Installing Backports Repositories with latest versions of KDE Plasma *****"
 [ ! -f /etc/apt/sources.list.d/kubuntu-ppa-ubuntu-backports-jammy.list ] && sudo add-apt-repository ppa:kubuntu-ppa/backports -y
@@ -85,7 +84,7 @@ echo -e "\n***** Removing Maui SSDM theme to ensure that Breeze will be the defa
 sudo -E apt-get purge -yq sddm-theme-debian-maui
 
 echo -e "\n***** Removing cloud-init *****"
-# cloud-init is not useful on the desktop
+# cloud-init is not useful on the desktop (only needed for Server.iso)
 sudo -E apt-get purge -yq cloud-init cloud-guest-utils cloud-initramfs-copymods	cloud-initramfs-dyn-netconf
 sudo rm -rfv /etc/cloud && sudo rm -rfv /var/lib/cloud/
 
@@ -93,7 +92,7 @@ sudo rm -rfv /etc/cloud && sudo rm -rfv /var/lib/cloud/
 sudo -E apt-mark manual netplan.io
 
 echo -e "\n***** Configuring the Network via Netplan & NetworkManager *****"
-# this will overwrite any previous config
+# this will overwrite any previous (only needed for Server.iso)
 echo '# Let NetworkManager manage all devices on this system
 network:
   version: 2
@@ -104,7 +103,7 @@ sudo netplan generate
 sudo netplan apply
 
 echo -e "\n***** Enabling Graphical Boot *****"
-# replacing the complete line only if no other options have been set
+# replacing the complete line only if no other options have been set (only needed for Server.iso)
 sudo sed -i.bak '/^GRUB_CMDLINE_LINUX_DEFAULT=""/c\GRUB_CMDLINE_LINUX_DEFAULT="quiet splash"' /etc/default/grub
 sudo -E update-grub
 
@@ -137,14 +136,21 @@ kwriteconfig5 --file plasmanotifyrc --group Applications --group @other --key Sh
 
 echo -e "\n***** Installing Firefox from PPA & setting it as Default *****"
 ## reasons for not using Firefox Snap: slow start, incompatible with KeePassXC
-# remove snap version, just in case
+# remove snap version (only needed for Kubuntu.iso)
 sudo snap remove firefox gnome-3-38-2004 gtk-common-themes
+rm -rf ~/snap/firefox
 [ ! -f /etc/apt/sources.list.d/mozillateam-ubuntu-ppa-jammy.list ] && sudo add-apt-repository ppa:mozillateam/ppa -y
 
 # remove tarball installed Firefox (only checking the default locations)
 # https://support.mozilla.org/en-US/kb/install-firefox-linux#w_install-firefox-from-mozilla-builds-for-advanced-users
 [ -f /usr/local/bin/firefox ] && sudo rm -v /usr/local/bin/firefox /usr/local/share/applications/firefox.desktop
 [ -d /opt/firefox ] && sudo rm -rf /opt/firefox
+
+# preventing Firefox Snap version from being installed
+[ ! -f /etc/apt/preferences.d/firefox-snap-prevent ] && echo 'Package: firefox*
+Pin: release o=Ubuntu 
+Pin-Priority: -1
+' | sudo tee /etc/apt/preferences.d/firefox-snap-prevent > /dev/null
 
 [ ! -f /etc/apt/preferences.d/firefox-mozillateam ] && echo 'Package: *
 Pin: release o=LP-PPA-mozillateam
