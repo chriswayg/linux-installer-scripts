@@ -2,13 +2,16 @@
 set -e
 
 ## Bash Script to Install KDE Plasma from Backports Extra on Ubuntu Server or Kubuntu Desktop 22.04 LTS 
-## use on a standard install of ubuntu-22.04.1-live-server-amd64.iso or kubuntu-22.04.1-desktop-amd64.iso
+## use on a standard install of ubuntu-22.04.1-live-server-amd64.iso (with SSH) or kubuntu-22.04.1-desktop-amd64.iso
+# the result is very similar, with some additional packages (ssh, htop, needrestart, ...) remaining on the server.iso based install
+# while the Kubuntu.iso based install is missing some KDE games, but has efibootmgr, partitionmanager, secure boot utilities and grub-efi added
 # This script is largely idempotent, which means it can be run more than once, in case of an error for example.
 
 ## Usage (additional logs in /var/log/, increase 'run=02' to prevent caching after making changes):
 #  use 'script' command for logging (logging via '| tee ' did not work as it hangs & prevents responses to user input)
 #  run this as a normal user (the script will ask for sudo elevation)
 #
+#    sudo apt install curl # only when using kubuntu.iso
 #    script -q -a install-kde-plasma.log
 #    bash <(curl -Ls https://raw.githubusercontent.com/chriswayg/linux-installer-scripts/main/install-plasma.sh?run=01)
 #
