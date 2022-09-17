@@ -1,8 +1,8 @@
 #!/bin/bash
 set -e
 
-## Bash Script to Install KDE Plasma from Backports Extra on Ubuntu Server 22.04 LTS
-## used on a standard install of ubuntu-22.04.1-live-server-amd64.iso
+## Bash Script to Install KDE Plasma from Backports Extra on Ubuntu Server or Kubuntu Desktop 22.04 LTS 
+## use on a standard install of ubuntu-22.04.1-live-server-amd64.iso or kubuntu-22.04.1-desktop-amd64.iso
 # This script is largely idempotent, which means it can be run more than once, in case of an error for example.
 
 ## Usage (additional logs in /var/log/, increase 'run=02' to prevent caching after making changes):
@@ -19,15 +19,15 @@ set -e
 #    exit   # or Ctrl-D or to close the script log
 #    sudo reboot
 
-# Work-around for a bug where whiptail/dialog is becoming unresponsive & the cursor is missing in terminal
+# Disabling whiptail/dialog during installation (due to bugginess) and preventing configuration dialogs as much as possible
 # using sudo -E (--preserve-env) to make sure that 'needrestart' will not prompt repeatedly
 sudo DEBIAN_FRONTEND=noninteractive dpkg-reconfigure debconf --frontend=readline --priority=critical
 export DEBIAN_FRONTEND=readline
 export NEEDRESTART_SUSPEND=true
 sudo -E apt-get update
 
-# only run this once to record the installed server iso packages before changes are made
-[ ! -f /var/log/installed-packages-server.log ] && sudo dpkg --get-selections | sudo tee /var/log/installed-packages-server.log > /dev/null
+# only run this once to record the installed default packages before changes are made
+[ ! -f /var/log/installed-packages-default.log ] && sudo dpkg --get-selections | sudo tee /var/log/installed-packages-default.log > /dev/null
 
 # change this to the relevant timezone
 sudo timedatectl set-timezone Asia/Manila
@@ -73,8 +73,9 @@ sudo -E apt-fast install -yq kubuntu-restricted-extras kubuntu-restricted-addons
 
 echo -e "\n***** Adding Wayland as an option *****"
 # note: copy-paste from & to macOS <-> Parallels VM does not work in Wayland
-sudo -E apt-get install -yq kwin-wayland plasma-workspace-wayland
-sudo -E apt-get install -yq $(check-language-support -l en)
+sudo -E apt-fast install -yq kwin-wayland plasma-workspace-wayland
+# prevent errors regarding missing language support
+sudo -E apt-fast install -yq $(check-language-support -l en)
 
 echo -e "\n***** Removing Maui SSDM theme to ensure that Breeze will be the default *****"
 # usually this has not been installed anyways
@@ -82,7 +83,7 @@ sudo -E apt-get purge -yq sddm-theme-debian-maui
 
 echo -e "\n***** Removing cloud-init *****"
 # cloud-init is not useful on the desktop
-sudo -E apt-get purge -yq cloud-init
+sudo -E apt-get purge -yq cloud-init cloud-guest-utils cloud-initramfs-copymods	cloud-initramfs-dyn-netconf
 sudo rm -rfv /etc/cloud && sudo rm -rfv /var/lib/cloud/
 
 # ensuring that netplan.io will not be autoremoved
@@ -104,9 +105,10 @@ echo -e "\n***** Enabling Graphical Boot *****"
 sudo sed -i.bak '/^GRUB_CMDLINE_LINUX_DEFAULT=""/c\GRUB_CMDLINE_LINUX_DEFAULT="quiet splash"' /etc/default/grub
 sudo -E update-grub
 
-echo -e "\n***** Replacing Kubuntu Boot Splash with Breeze as default  *****"
+echo -e "\n***** Installing Breeze Kubuntu Boot Splash *****"
 # TODO: this still requires manually setting Breeze as boot splash in Settings -> Appearance -> Boot Splash Screen
 # change back-and-forth with 'Apply' (possibly restart) between Breeze (Text Mode) and Breeze for the setting to be applied
+# (attempted to replace Kubuntu Boot Splash with Breeze as default using the commented out lines)
 #sudo -E apt-get purge -yq plymouth-theme-kubuntu-logo plymouth-theme-spinner plymouth-theme-ubuntu-text plymouth-theme-kubuntu-text
 sudo -E apt-get install -yq kde-config-plymouth plymouth-theme-breeze
 
@@ -133,7 +135,7 @@ kwriteconfig5 --file plasmanotifyrc --group Applications --group @other --key Sh
 echo -e "\n***** Installing Firefox from PPA & setting it as Default *****"
 ## reasons for not using Firefox Snap: slow start, incompatible with KeePassXC
 # remove snap version, just in case
-sudo snap remove firefox
+sudo snap remove firefox gnome-3-38-2004 gtk-common-themes
 [ ! -f /etc/apt/sources.list.d/mozillateam-ubuntu-ppa-jammy.list ] && sudo add-apt-repository ppa:mozillateam/ppa -y
 
 # remove tarball installed Firefox (only checking the default locations)
@@ -147,7 +149,7 @@ Pin-Priority: 1001
 ' | sudo tee /etc/apt/preferences.d/firefox-mozillateam > /dev/null
 
 [ ! -f /etc/apt/apt.conf.d/51unattended-upgrades-firefox ] && echo 'Unattended-Upgrade::Allowed-Origins:: "LP-PPA-mozillateam:jammy";' | sudo tee /etc/apt/apt.conf.d/51unattended-upgrades-firefox
-sudo -E apt-get install --allow-downgrades -y firefox
+sudo -E apt-get install --allow-downgrades -yq firefox
 
 # set Firefox as default in Plasma
 kwriteconfig5 --file kdeglobals --group "General" --key BrowserApplication "firefox.desktop" 
@@ -189,10 +191,11 @@ echo -e "\n***** Installing deb-get for 3rd party deb packages *****"
 sudo deb-get install brave-browser
 sudo deb-get install keepassxc
 sudo deb-get install nextcloud-desktop
+sudo -E apt-get install -yq dolphin-nextcloud
 
 echo -e "\n***** Updating the current installation, cleanup *****"
 sudo -E apt-get update
-sudo -E apt-get upgrade -yq
+sudo -E apt-fast upgrade -yq
 
 # Cleanup 
 sudo -E apt-get -yq autoremove
