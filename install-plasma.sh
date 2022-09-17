@@ -184,9 +184,11 @@ mkdir -p ~/Applications
 # TODO: the last command results in a timeout with: "ERROR: notification: Process org.freedesktop.Notifications exited with status 1", but still works
 
 echo -e "\n***** Installing deb-get for 3rd party deb packages *****"
-# TODO: - add installing additional essential packages here (for example KeePassXC)
-#       - add installing developer related packages (including manually added to deb-get)
+# TODO: add installing developer related packages (including manually added to deb-get)
 [ ! -f /usr/bin/deb-get ] && curl -sL https://raw.githubusercontent.com/wimpysworld/deb-get/main/deb-get | sudo -E bash -s install deb-get
+sudo deb-get install brave-browser
+sudo deb-get install keepassxc
+sudo deb-get install nextcloud-desktop
 
 echo -e "\n***** Updating the current installation, cleanup *****"
 sudo -E apt-get update
