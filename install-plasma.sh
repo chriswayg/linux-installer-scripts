@@ -41,11 +41,11 @@ sudo -E apt-get update
 sudo timedatectl set-timezone Asia/Manila
 
 echo -e "\n***** Installing Backports Repositories with latest versions of KDE Plasma *****"
-[ ! -f /etc/apt/sources.list.d/kubuntu-ppa-ubuntu-backports-jammy.list ] && sudo add-apt-repository ppa:kubuntu-ppa/backports -y
-[ ! -f /etc/apt/sources.list.d/kubuntu-ppa-ubuntu-backports-extra-jammy.list ] && sudo add-apt-repository ppa:kubuntu-ppa/backports-extra -y
+[ ! -f /etc/apt/sources.list.d/kubuntu-ppa-ubuntu-backports-jammy.list ] && sudo add-apt-repository --no-update ppa:kubuntu-ppa/backports -y
+[ ! -f /etc/apt/sources.list.d/kubuntu-ppa-ubuntu-backports-extra-jammy.list ] && sudo add-apt-repository --no-update ppa:kubuntu-ppa/backports-extra -y
 
 echo -e "\n***** Installing & configuring apt-fast to speed up Plasma download *****"
-[ ! -f /etc/apt/sources.list.d/apt-fast-ubuntu-stable-jammy.list ] && sudo add-apt-repository ppa:apt-fast/stable -y
+[ ! -f /etc/apt/sources.list.d/apt-fast-ubuntu-stable-jammy.list ] && sudo add-apt-repository --no-update ppa:apt-fast/stable -y
 cat > ~/debconf-aptfast << "EOF"
 apt-fast	apt-fast/aptmanager	select	apt-get
 apt-fast	apt-fast/maxdownloads	string	10
@@ -55,9 +55,14 @@ EOF
 sudo debconf-set-selections debconf-aptfast
 rm ~/debconf-aptfast
 
+sudo -E apt-get update
 sudo -E apt-get install -yq apt-fast
 
-# Using this sequence of installation, Firefox Snap is expected to NOT be installed
+echo -e "\n***** Upgrading the current installation *****"
+# if Kubuntu is already installed (Kubuntu.iso based), this will upgrade KDE Plasma using backports-extra
+sudo -E apt-fast upgrade -yq
+
+# Using this sequence of installation, Firefox Snap is expected to NOT be installed (on Server.iso)
 
 echo -e "\n***** Installing Kubuntu Desktop *****"
 sudo -E apt-fast install -yq kubuntu-desktop
