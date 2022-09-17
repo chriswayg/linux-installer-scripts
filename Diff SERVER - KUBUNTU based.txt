@@ -1,0 +1,125 @@
+--- /Users/christian/Desktop/BASED ON SERVER.txt	2022-09-17 18:55:35.000000000 +0800
++++ /Users/christian/Desktop/BASED ON KUBUNTU.txt	2022-09-17 18:38:59.000000000 +0800
+@@ -1,4 +1,4 @@
+-BASED ON SERVER
++BASED ON KUBUNTU
+
++efibootmgr					install
++grub-efi-amd64-bin				install
++grub-efi-amd64-signed				install
++linux-headers-5.15.0-43				install
++linux-headers-5.15.0-43-generic			install
++linux-image-5.15.0-43-generic			install
++linux-modules-5.15.0-43-generic			install
++linux-modules-extra-5.15.0-43-generic		install
++mokutil						install
++partitionmanager				install
++shim-signed					install
+ 
+ 
+-bcache-tools					install
+-btrfs-progs					install
+-byobu						install
+-elisa						install
+-ethtool						install
+-finalrd						install
+-fonts-ubuntu-console				install
+-gawk						install
+-htop						install
+-kamera						install
+-kdegames-card-data-kf5				install
+-kdegames-mahjongg-data-kf5			install
+-kmahjongg					install
+-kmines						install
+-konversation					install
+-konversation-data				install
+-kpartx						install
+-kpat						install
+-krdc						install
+-ksudoku						install
+-ktorrent					install
+-ktorrent-data					install
+-landscape-common				install
+
+-libevent-core-2.1-7:amd64			install
+-libgtkd-3-0:amd64				install
+-libinih1:amd64					install
+-libintl-perl					install
+-libintl-xs-perl					install
+-libisns0:amd64					install
+-libkf5kdegames-data				install
+-libkf5kdegames7:amd64				install
+-libkf5kdegamesprivate7:amd64			install
+-libkf5kmahjongglib5				install
+-libkf5plotting5:amd64				install
+-libkf5torrent6abi1:amd64			install
+-libktorrent-l10n				install
+-libllvm11:amd64					install
+-libmodule-find-perl				install
+-libmodule-scandeps-perl				install
+-libokular5core10				install
+-libopeniscsiusr					install
+-libphobos2-ldc-shared98:amd64			install
+-libproc-processtable-perl:amd64			install
+-libsgutils2-2:amd64				install
+-libsigsegv2:amd64				install
+-libsort-naturally-perl				install
+-libterm-readkey-perl				install
+-liburcu8:amd64					install
+-libvte-2.91-0:amd64				install
+-libvte-2.91-common				install
+-libvted-3-0:amd64				install
+
+-lxd-agent-loader				install
+-mdadm						install
+-motd-news-config				install
+-multipath-tools					install
+-ncurses-term					install
+-needrestart					install
+-open-iscsi					install
+-open-vm-tools					install
+-openssh-server					install
+-openssh-sftp-server				install
+-overlayroot					install
+-phonon4qt5-backend-vlc:amd64			install
+-pinentry-curses					install
+-plasma-workspace-wallpapers			install
+-pollinate					install
+
+-python3-attr					install
+-python3-automat					install
+-python3-bcrypt					install
+-python3-configobj				install
+-python3-constantly				install
+-python3-distutils				install
+-python3-hamcrest				install
+-python3-hyperlink				install
+-python3-idna					installll
+-python3-incremental				install
+-python3-json-pointer				deinstall
+-python3-jsonpatch				deinstall
+-python3-jsonschema				deinstall
+-python3-lib2to3					install
+-python3-newt:amd64				install
+-python3-openssl					install
+-python3-pyasn1					install
+-python3-pyasn1-modules				install
+-python3-serial					install
+-python3-service-identity			install
+-python3-setuptools				install
+-python3-twisted					install
+-python3-zope.interface				install
+
+-run-one						install
+-screen						install
+-sg3-utils					install
+-sg3-utils-udev					install
+-sosreport					install
+-ssh-import-id					install
+-tilix						install
+-tilix-common					install
+-tmux						install
+-vim						install
+-vim-runtime					install
+-xfsprogs					install
+-zerofree					install
