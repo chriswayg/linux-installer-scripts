@@ -12,7 +12,7 @@ set -e
 # 
 # This script is largely idempotent, which means it can be run more than once, in case of an error for example.
 
-## Usage (additional logs in /var/log/, increase 'run=02' to prevent caching after making changes):
+## USAGE (additional logs in /var/log/, increase 'run=02' to prevent caching after making changes):
 #  use 'script' command for logging (logging via '| tee ' did not work as it hangs & prevents responses to user input)
 #  run this as a normal user (the script will ask for sudo elevation)
 #
@@ -27,17 +27,22 @@ set -e
 #    exit   # or Ctrl-D or to close the script log
 #    sudo reboot
 
+## TODO: - determine if installation was originally made from Server.iso or Kubuntu.iso
+#        - Using: `read -r firstline</var/log/installer/media-info` (search for "Ubuntu-Server")
+#        - use conditionals to only execute the commands required for the installation mode and try to keep
+#          the code required for the Server.iso mostly together in one section
+
 # Disabling whiptail/dialog during installation (due to bugginess) and preventing configuration dialogs as much as possible
 # using sudo -E (--preserve-env) to make sure that 'needrestart' will not prompt repeatedly
 sudo DEBIAN_FRONTEND=noninteractive dpkg-reconfigure debconf --frontend=readline --priority=critical
 export DEBIAN_FRONTEND=readline
-export NEEDRESTART_SUSPEND=true
+export NEEDRESTART_SUSPEND=true  # (only needed for Server.iso)
 sudo -E apt-get update
 
 # only run this once to record the installed default packages before changes are made
 [ ! -f /var/log/installed-packages-default.log ] && sudo dpkg --get-selections | sudo tee /var/log/installed-packages-default.log > /dev/null
 
-# change this to the relevant timezone (only needed for Server.iso)
+# change this to the relevant timezone (only needed for Server.iso, as Kubuntu installer sets this up properly)
 sudo timedatectl set-timezone Asia/Manila
 
 echo -e "\n***** Installing Backports Repositories with latest versions of KDE Plasma *****"
@@ -59,12 +64,12 @@ sudo -E apt-get update
 sudo -E apt-get install -yq apt-fast
 
 echo -e "\n***** Upgrading the current installation *****"
-# if Kubuntu is already installed (Kubuntu.iso based), this will upgrade KDE Plasma using backports-extra
+# if Kubuntu was already installed (Kubuntu.iso based), this will upgrade KDE Plasma using backports-extra
 sudo -E apt-fast upgrade -yq
 
 # Using this sequence of installation, Firefox Snap is expected to NOT be installed (on Server.iso)
 
-echo -e "\n***** Installing Kubuntu Desktop *****"
+echo -e "\n***** Installing Kubuntu Desktop *****" # (only needed for Server.iso)
 sudo -E apt-fast install -yq kubuntu-desktop
 
 echo -e "\n***** Installing additional Kubuntu Desktop (via tasksel) & KDE Plasma packages *****"
@@ -85,7 +90,7 @@ sudo -E apt-fast install -yq kwin-wayland plasma-workspace-wayland
 sudo -E apt-fast install -yq $(check-language-support -l en)
 
 echo -e "\n***** Removing Maui SSDM theme to ensure that Breeze will be the default *****"
-# usually this has not been installed anyways
+# usually this has not been installed anyways (this should not be needed)
 sudo -E apt-get purge -yq sddm-theme-debian-maui
 
 echo -e "\n***** Removing cloud-init *****"
@@ -93,11 +98,11 @@ echo -e "\n***** Removing cloud-init *****"
 sudo -E apt-get purge -yq cloud-init cloud-guest-utils cloud-initramfs-copymods	cloud-initramfs-dyn-netconf
 sudo rm -rfv /etc/cloud && sudo rm -rfv /var/lib/cloud/
 
-# ensuring that netplan.io will not be autoremoved
+# ensuring that netplan.io will not be autoremoved (this should not be needed)
 sudo -E apt-mark manual netplan.io
 
 echo -e "\n***** Configuring the Network via Netplan & NetworkManager *****"
-# this will overwrite any previous (only needed for Server.iso)
+# this will overwrite any previous configuration (only needed for Server.iso)
 echo '# Let NetworkManager manage all devices on this system
 network:
   version: 2
@@ -148,7 +153,7 @@ sudo snap remove firefox gnome-3-38-2004 gtk-common-themes
 rm -rf ~/snap/firefox
 [ ! -f /etc/apt/sources.list.d/mozillateam-ubuntu-ppa-jammy.list ] && sudo add-apt-repository ppa:mozillateam/ppa -y
 
-# remove tarball installed Firefox (only checking the default locations)
+# remove tarball installed Firefox (only checking the default locations, not needed on a fresh install)
 # https://support.mozilla.org/en-US/kb/install-firefox-linux#w_install-firefox-from-mozilla-builds-for-advanced-users
 [ -f /usr/local/bin/firefox ] && sudo rm -v /usr/local/bin/firefox /usr/local/share/applications/firefox.desktop
 [ -d /opt/firefox ] && sudo rm -rf /opt/firefox
@@ -214,7 +219,7 @@ sudo -E apt-get update
 sudo -E apt-fast upgrade -yq
 
 # add some packages
-sudo -E apt-get install -yq efibootmgr partitionmanager # (wwhen using Server.iso)
+sudo -E apt-get install -yq efibootmgr partitionmanager # (when using Server.iso)
 sudo -E apt-get install -yq htop ktorrent # (when using Kubuntu.iso)
 
 # Cleanup 
