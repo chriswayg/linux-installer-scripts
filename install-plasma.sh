@@ -218,9 +218,10 @@ echo -e "\n***** Updating the current installation, cleanup *****"
 sudo -E apt-get update
 sudo -E apt-fast upgrade -yq
 
-# add some packages
+# add some packages, replace ktorrent with qbittorrent
 sudo -E apt-get install -yq efibootmgr partitionmanager # (when using Server.iso)
-sudo -E apt-get install -yq htop ktorrent # (when using Kubuntu.iso)
+sudo -E apt-get remove -yq ktorrent
+sudo -E apt-get install -yq htop qbittorrent
 
 # Cleanup 
 sudo -E apt-get -yq autoremove
